@@ -1,105 +1,90 @@
-// frontend/src/App.js
-import React, { useState } from "react";
-import axios from "axios";
+import React, { useState } from 'react';
+import axios from 'axios';
 
-function App() {
-  const [jsonInput, setJsonInput] = useState("");
+const App = () => {
+  const [jsonData, setJsonData] = useState('');
+  const [file, setFile] = useState(null);
   const [response, setResponse] = useState(null);
-  const [selectedFilters, setSelectedFilters] = useState([]);
-  const [filteredResponse, setFilteredResponse] = useState(null);
 
+  // Handle JSON data input change
   const handleJsonChange = (e) => {
-    setJsonInput(e.target.value);
+    setJsonData(e.target.value);
   };
 
-  const handleSubmit = async () => {
+  // Handle file input change
+  const handleFileChange = (e) => {
+    setFile(e.target.files[0]);
+  };
+
+  // Convert file to base64
+  const convertToBase64 = (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result.split(',')[1]); // Get the base64 string
+      reader.onerror = (error) => reject(error);
+    });
+  };
+
+  // Handle form submission
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
     try {
-      // Validate JSON
-      const parsedInput = JSON.parse(jsonInput);
-      if (!parsedInput.data) {
-        alert("Invalid JSON format. 'data' field is required.");
-        return;
+      // Convert file to base64 string if a file is selected
+      let fileB64 = '';
+      if (file) {
+        fileB64 = await convertToBase64(file);
       }
 
-      const res = await axios.post("https://api-backend-zeta.vercel.app/bfhl", parsedInput);
-      setResponse(res.data);
-      setFilteredResponse(null); // Reset filtered response
+      // Create payload
+      const payload = {
+        data: JSON.parse(jsonData),
+        file_b64: fileB64
+      };
+
+      // Send POST request to the backend
+      const response = await axios.post('https://api-backend-zeta.vercel.app/bfhl', payload);
+      
+      // Update response state
+      setResponse(response.data);
     } catch (error) {
-      console.error("Error during submission:", error);
-      alert("Invalid JSON or server error.");
+      console.error('Error:', error);
     }
   };
 
-  const handleFilterChange = (e) => {
-    const value = e.target.value;
-    setSelectedFilters(
-      e.target.checked
-        ? [...selectedFilters, value]
-        : selectedFilters.filter((filter) => filter !== value)
-    );
-  };
-
-  const applyFilters = () => {
-    if (!response) return;
-
-    let filteredData = {};
-    selectedFilters.forEach((filter) => {
-      filteredData[filter] = response[filter];
-    });
-    setFilteredResponse(filteredData);
-  };
-
   return (
-    <div className="App">
-      <header className="App-header">
-        <h1>College Roll Number</h1>
-        <textarea
-          rows="5"
-          cols="50"
-          value={jsonInput}
-          onChange={handleJsonChange}
-          placeholder='Enter JSON here... Example: {"data": ["A","1","b","2"]}'
-        />
-        <button onClick={handleSubmit}>Submit</button>
-        {response && (
-          <>
-            <div>
-              <h3>Select Filters:</h3>
-              <label>
-                <input
-                  type="checkbox"
-                  value="alphabets"
-                  onChange={handleFilterChange}
-                />
-                Alphabets
-              </label>
-              <label>
-                <input
-                  type="checkbox"
-                  value="numbers"
-                  onChange={handleFilterChange}
-                />
-                Numbers
-              </label>
-              <label>
-                <input
-                  type="checkbox"
-                  value="highest_lowercase_alphabet"
-                  onChange={handleFilterChange}
-                />
-                Highest Lowercase Alphabet
-              </label>
-              <button onClick={applyFilters}>Apply Filters</button>
-            </div>
-            <div>
-              <h3>Response:</h3>
-              <pre>{JSON.stringify(filteredResponse || response, null, 2)}</pre>
-            </div>
-          </>
-        )}
-      </header>
+    <div style={{ padding: '20px' }}>
+      <h1>Bajaj Finserv Health Dev Challenge</h1>
+      
+      {/* JSON Data Input */}
+      <textarea 
+        rows="4" 
+        cols="50" 
+        placeholder='Enter JSON data here...' 
+        value={jsonData} 
+        onChange={handleJsonChange}
+      />
+
+      {/* File Upload Input */}
+      <input 
+        type="file" 
+        onChange={handleFileChange} 
+        style={{ display: 'block', margin: '10px 0' }}
+      />
+
+      {/* Submit Button */}
+      <button onClick={handleSubmit}>Submit</button>
+
+      {/* Display Response */}
+      {response && (
+        <div style={{ marginTop: '20px' }}>
+          <h3>Response:</h3>
+          <pre>{JSON.stringify(response, null, 2)}</pre>
+        </div>
+      )}
     </div>
   );
-}
+};
 
 export default App;
