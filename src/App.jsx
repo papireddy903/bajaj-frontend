@@ -44,7 +44,7 @@ const App = () => {
       };
 
       // Send POST request to the backend
-      const response = await axios.post('bajaj-api-back.vercel.app/bfhl', payload);
+      const response = await axios.post('https://bajaj-api-back.vercel.app/bfhl', payload);
       // const response = await axios.post('http://127.0.0.1:5000/bfhl', payload);
       
       // Update response state
