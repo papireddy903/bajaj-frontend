@@ -1,91 +1,105 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 
-const App = () => {
-  const [jsonData, setJsonData] = useState('');
+function App() {
+  const [jsonInput, setJsonInput] = useState('');
   const [file, setFile] = useState(null);
   const [response, setResponse] = useState(null);
+  const [dropdown, setDropdown] = useState([]);
 
-  // Handle JSON data input change
-  const handleJsonChange = (e) => {
-    setJsonData(e.target.value);
+  const handleInputChange = (event) => {
+    setJsonInput(event.target.value);
   };
 
-  // Handle file input change
-  const handleFileChange = (e) => {
-    setFile(e.target.files[0]);
+  const handleFileChange = (event) => {
+    setFile(event.target.files[0]);
   };
 
-  // Convert file to base64
-  const convertToBase64 = (file) => {
+  const handleDropdownChange = (event) => {
+    const { value, checked } = event.target;
+    setDropdown((prev) =>
+      checked ? [...prev, value] : prev.filter((option) => option !== value)
+    );
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    try {
+      const parsedInput = JSON.parse(jsonInput);
+      let fileBase64 = "";
+      if (file) {
+        fileBase64 = await convertFileToBase64(file);
+      }
+
+      parsedInput.file_b64 = fileBase64;
+      const res = await axios.post('http://localhost:5000/bfhl', parsedInput);
+      console.log("Response from backend:", res.data);
+      setResponse(res.data);
+    } catch (error) {
+      alert('Invalid JSON or Backend Error: ' + error.message);
+      console.error("Error:", error);
+    }
+  };
+
+  const convertFileToBase64 = (file) => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result.split(',')[1]); // Get the base64 string
+      reader.onload = () => {
+        const base64String = reader.result.split(',')[1];
+        resolve(base64String);
+      };
       reader.onerror = (error) => reject(error);
     });
   };
 
-  // Handle form submission
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const filteredResponse = () => {
+    if (!response) return null;
+    if (dropdown.length === 0) return response;
 
-    try {
-      // Convert file to base64 string if a file is selected
-      let fileB64 = '';
-      if (file) {
-        fileB64 = await convertToBase64(file);
+    const filtered = {};
+    dropdown.forEach((key) => {
+      if (response[key] !== undefined) {
+        filtered[key] = response[key];
       }
+    });
 
-      // Create payload
-      const payload = {
-        data: JSON.parse(jsonData),
-        file_b64: fileB64
-      };
-
-      // Send POST request to the backend
-      const response = await axios.post('https://bajaj-api-back-6mpum3s58-papireddy903s-projects.vercel.app/bfhl', payload);
-      // const response = await axios.post('http://127.0.0.1:5000/bfhl', payload);
-      
-      // Update response state
-      setResponse(response.data);
-    } catch (error) {
-      console.error('Error:', error);
-    }
+    return filtered;
   };
 
   return (
-    <div style={{ padding: '20px' }}>
-      <h1>Bajaj Finserv Health Dev Challenge</h1>
-      
-      {/* JSON Data Input */}
-      <textarea 
-        rows="4" 
-        cols="50" 
-        placeholder='Enter JSON data here...' 
-        value={jsonData} 
-        onChange={handleJsonChange}
-      />
+    <div className="App">
+      <h1>JSON Input to Flask Backend</h1>
+      <form onSubmit={handleSubmit}>
+        <textarea
+          rows="10"
+          cols="50"
+          value={jsonInput}
+          onChange={handleInputChange}
+          placeholder='Enter JSON like { "data": ["A", "B", "c", "1", "2"] }'
+        />
+        <br />
+        <input type="file" onChange={handleFileChange} />
+        <br />
+        <button type="submit">Submit</button>
+      </form>
 
-      {/* File Upload Input */}
-      <input 
-        type="file" 
-        onChange={handleFileChange} 
-        style={{ display: 'block', margin: '10px 0' }}
-      />
-
-      {/* Submit Button */}
-      <button onClick={handleSubmit}>Submit</button>
-
-      {/* Display Response */}
       {response && (
-        <div style={{ marginTop: '20px' }}>
-          <h3>Response:</h3>
-          <pre>{JSON.stringify(response, null, 2)}</pre>
+        <div>
+          <h2>Response:</h2>
+          <div>
+            <input type="checkbox" value="numbers" onChange={handleDropdownChange} /> Numbers
+            <input type="checkbox" value="alphabets" onChange={handleDropdownChange} /> Alphabets
+            <input type="checkbox" value="highest_lowercase_alphabet" onChange={handleDropdownChange} /> Highest Lowercase Alphabet
+          </div>
+          <div>
+            <pre>{JSON.stringify(filteredResponse(), null, 2)}</pre>
+          </div>
         </div>
       )}
     </div>
   );
-};
+}
 
 export default App;
