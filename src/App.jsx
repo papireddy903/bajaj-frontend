@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import './App.css';
 
 function App() {
   const [jsonInput, setJsonInput] = useState('');
@@ -34,11 +35,9 @@ function App() {
 
       parsedInput.file_b64 = fileBase64;
       const res = await axios.post('https://bajaj-flask-backend.vercel.app/bfhl', parsedInput);
-      console.log("Response from backend:", res.data);
       setResponse(res.data);
     } catch (error) {
       alert('Invalid JSON or Backend Error: ' + error.message);
-      console.error("Error:", error);
     }
   };
 
@@ -70,9 +69,9 @@ function App() {
 
   return (
     <div className="App">
-      <h1>JSON Input to Flask Backend</h1>
-      <form onSubmit={handleSubmit}>
+      <form className="form" onSubmit={handleSubmit}>
         <textarea
+          className="json-input"
           rows="10"
           cols="50"
           value={jsonInput}
@@ -80,20 +79,20 @@ function App() {
           placeholder='Enter JSON like { "data": ["A", "B", "c", "1", "2"] }'
         />
         <br />
-        <input type="file" onChange={handleFileChange} />
+        <input className="file-input" type="file" onChange={handleFileChange} />
         <br />
-        <button type="submit">Submit</button>
+        <button className="submit-button" type="submit">Submit</button>
       </form>
 
       {response && (
-        <div>
-          <h2>Response:</h2>
-          <div>
-            <input type="checkbox" value="numbers" onChange={handleDropdownChange} /> Numbers
-            <input type="checkbox" value="alphabets" onChange={handleDropdownChange} /> Alphabets
-            <input type="checkbox" value="highest_lowercase_alphabet" onChange={handleDropdownChange} /> Highest Lowercase Alphabet
+        <div className="response-container">
+          <h2 className="response-title">Response:</h2>
+          <div className="checkbox-group">
+            <input className="checkbox" type="checkbox" value="numbers" onChange={handleDropdownChange} /> Numbers
+            <input className="checkbox" type="checkbox" value="alphabets" onChange={handleDropdownChange} /> Alphabets
+            <input className="checkbox" type="checkbox" value="highest_lowercase_alphabet" onChange={handleDropdownChange} /> Highest Lowercase Alphabet
           </div>
-          <div>
+          <div className="response-output">
             <pre>{JSON.stringify(filteredResponse(), null, 2)}</pre>
           </div>
         </div>
