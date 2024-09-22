@@ -33,7 +33,7 @@ function App() {
       }
 
       parsedInput.file_b64 = fileBase64;
-      const res = await axios.post('http://localhost:5000/bfhl', parsedInput);
+      const res = await axios.post('https://bajaj-flask-backend.vercel.app/bfhl', parsedInput);
       console.log("Response from backend:", res.data);
       setResponse(res.data);
     } catch (error) {
