@@ -22,7 +22,7 @@ function App() {
         return;
       }
 
-      const res = await axios.post("http://localhost:5000/bfhl", parsedInput);
+      const res = await axios.post("https://api-backend-zeta.vercel.app/bfhl", parsedInput);
       setResponse(res.data);
       setFilteredResponse(null); // Reset filtered response
     } catch (error) {
