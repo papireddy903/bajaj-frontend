@@ -44,7 +44,7 @@ const App = () => {
       };
 
       // Send POST request to the backend
-      const response = await axios.post('https://api-backend-zeta.vercel.app/bfhl', payload);
+      const response = await axios.post('https://bajaj-api-back.vercel.app/bfhl', payload);
       
       // Update response state
       setResponse(response.data);
