@@ -11,7 +11,7 @@ function App() {
   });
 
   // const url = "http://127.0.0.1:8080/bfhl";  // local url
-  const url = "https://bajaj-api-006x.onrender.com/bfhl"
+  const url = "http://127.0.0.1:8000/bfhl"
 
   const handleSubmit = async () => {
     try {
