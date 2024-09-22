@@ -12,7 +12,8 @@ function App() {
 
   // const url = "http://127.0.0.1:8080/bfhl";  // local url
   // const url = "http://127.0.0.1:8000/bfhl";
-  const url =  "https://api-backend-9fk00ex18-papireddy903s-projects.vercel.app/bfhl";
+  const url = "https://api-backend-zeta.vercel.app/bfhl";
+  
   const handleSubmit = async () => {
     try {
       const parsedData = JSON.parse(jsonInput);
